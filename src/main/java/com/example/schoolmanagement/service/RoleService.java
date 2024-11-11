@@ -35,13 +35,11 @@ public class RoleService {
         role.setUpdatedAt(roleRequestDTO.getUpdatedAt());
         role.setUpdatedBy(roleRequestDTO.getUpdatedBy());
         role.setUser(user);
-        return new ResponseDTO(Constants.CREATED, this.roleRepository.save(role), HttpStatus.CREATED.getReasonPhrase());
-
-
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.roleRepository.save(role)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.roleRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.roleRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -66,9 +64,8 @@ public class RoleService {
         if (roleResponseDTO.getUpdatedBy() != null) {
             role.setUpdatedBy(roleResponseDTO.getUpdatedBy());
         }
-        return new ResponseDTO(Constants.SUCCESS, this.roleRepository.save(role), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.roleRepository.save(role)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
-
 
     @Transactional
     public ResponseDTO remove(final String id) {
@@ -76,7 +73,7 @@ public class RoleService {
             throw new BadRequestServiceException("Role Id not found");
         }
         this.roleRepository.deleteById(id);
-        return new ResponseDTO("Successfully deleted.", id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
 }

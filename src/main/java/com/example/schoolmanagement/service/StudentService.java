@@ -31,9 +31,9 @@ public class StudentService {
     public ResponseDTO createStudent(final StudentRequestDTO studentRequestDTO) {
         final User user = this.userRepository.findById(studentRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("User not found"));
         user.setId(studentRequestDTO.getUserId());
+        final Student student = new Student();
         final Teacher teacher = this.teacherRepository.findById(studentRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException("Teacher not found"));
         teacher.setId(studentRequestDTO.getTeacherId());
-        final Student student = new Student();
         student.setName(studentRequestDTO.getName());
         student.setAddress(studentRequestDTO.getAddress());
         student.setPhone(studentRequestDTO.getPhone());
@@ -46,11 +46,11 @@ public class StudentService {
         student.setEmail(studentRequestDTO.getEmail());
         student.setUser(user);
         student.setTeacher(teacher);
-        return new ResponseDTO(Constants.SUCCESS, this.studentRepository.save(student), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.studentRepository.save(student)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.studentRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.studentRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -87,7 +87,7 @@ public class StudentService {
         if (studentResponseDTO.getMothersName() != null) {
             existingStudent.setMothersName(studentResponseDTO.getMothersName());
         }
-        return new ResponseDTO(Constants.SUCCESS, this.studentRepository.save(existingStudent), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.studentRepository.save(existingStudent)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -96,6 +96,7 @@ public class StudentService {
             throw new BadRequestServiceException("Student Id not found");
         }
         this.studentRepository.deleteById(id);
-        return new ResponseDTO(Constants.DELETED, id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
+
 }

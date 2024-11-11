@@ -41,12 +41,11 @@ public class StandardService {
         standard.setCreatedBy(standardRequestDTO.getCreatedBy());
         standard.setUpdatedBy(standardRequestDTO.getUpdatedBy());
         standard.setUser(user);
-        return new ResponseDTO(Constants.CREATED, this.standardRepository.save(standard), HttpStatus.CREATED.getReasonPhrase());
-
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.standardRepository.save(standard)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.standardRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.standardRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -66,9 +65,7 @@ public class StandardService {
             standard.setCreatedBy(schoolClassResponse.getCreatedBy());
         }
 
-        return new ResponseDTO(Constants.SUCCESS, this.standardRepository.save(standard), HttpStatus.OK.getReasonPhrase());
-
-
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.standardRepository.save(standard)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -77,7 +74,7 @@ public class StandardService {
             throw new BadRequestServiceException("Class Id not found");
         }
         this.standardRepository.deleteById(id);
-        return new ResponseDTO("Successfully deleted.", id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
 }

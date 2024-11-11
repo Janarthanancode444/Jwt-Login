@@ -9,15 +9,19 @@ import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -31,12 +35,14 @@ public class UserService {
         user.setName(userRequestDTO.getName());
         user.setPhone(userRequestDTO.getPhone());
         user.setEmail(userRequestDTO.getEmail());
-        return new ResponseDTO(Constants.SUCCESS, this.userRepository.save(user), HttpStatus.CREATED.getReasonPhrase());
+        user.setRoles(userRequestDTO.getRoles());
+        user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.userRepository.save(user)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     @Transactional
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.userRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.userRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -57,7 +63,13 @@ public class UserService {
             if (userResponseDTO.getUpdatedBy() != null) {
                 existingUser.setUpdatedBy(userResponseDTO.getUpdatedBy());
             }
-            return new ResponseDTO(Constants.SUCCESS, this.userRepository.save(existingUser), HttpStatus.OK.getReasonPhrase());
+            if (userResponseDTO.getPassword() != null) {
+                existingUser.setPassword(userResponseDTO.getPassword());
+            }
+            if (userResponseDTO.getRoles() != null) {
+                existingUser.setRoles(userResponseDTO.getRoles());
+            }
+            return ResponseDTO.builder().message(Constants.SUCCESS).data(this.userRepository.save(existingUser)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
         }
 
     }
@@ -68,8 +80,7 @@ public class UserService {
             throw new BadRequestServiceException("User not found");
         }
         this.userRepository.deleteById(id);
-        return new ResponseDTO(Constants.DELETED, id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
-
 }
 

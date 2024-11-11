@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface SchoolRepository extends JpaRepository<School, String> {
     @Query("SELECT s FROM School s " +
@@ -15,4 +17,7 @@ public interface SchoolRepository extends JpaRepository<School, String> {
             "(:search IS NULL OR LOWER(s.address) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<School> searchSchool(@Param("search") String search, Pageable pageable);
 
+    List<School> findByEmail(String email);
+
+    List<School> findByPhone(String phone);
 }

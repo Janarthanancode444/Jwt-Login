@@ -38,7 +38,7 @@ public class SchoolController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseDTO update(@RequestBody final SchoolResponseDTO responseSchoolDTO,@PathVariable final String id) {
+    public ResponseDTO update(@RequestBody final SchoolResponseDTO responseSchoolDTO, @PathVariable final String id) {
         return this.schoolService.update(responseSchoolDTO, id);
     }
 

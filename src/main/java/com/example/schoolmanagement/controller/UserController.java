@@ -1,9 +1,17 @@
 package com.example.schoolmanagement.controller;
 
+import com.example.schoolmanagement.dto.AuthRequest;
 import com.example.schoolmanagement.dto.ResponseDTO;
 import com.example.schoolmanagement.dto.UserRequestDTO;
 import com.example.schoolmanagement.dto.UserResponseDTO;
+import com.example.schoolmanagement.service.JwtService;
 import com.example.schoolmanagement.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,11 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-    private UserController(final UserService userService) {
-        this.userService = userService;
-    }
+    @Autowired
+    private JwtService jwtService;
 
-    private final UserService userService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/create")
     public ResponseDTO create(@RequestBody final UserRequestDTO userRequestDTO) {
@@ -28,6 +38,7 @@ public class UserController {
     }
 
     @GetMapping("/retrieve")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseDTO retrieve() {
         return this.userService.retrieve();
     }
@@ -41,4 +52,16 @@ public class UserController {
     public ResponseDTO remove(@PathVariable final String id) {
         return this.userService.removeUser(id);
     }
+
+    @PostMapping("/login")
+    public ResponseDTO authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+        if (authentication.isAuthenticated()) {
+            return this.jwtService.generateToken(authRequest.getUsername());
+        } else {
+            throw new UsernameNotFoundException("invalid user request !");
+        }
+    }
+
+
 }

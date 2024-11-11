@@ -33,8 +33,8 @@ public class TeacherService {
         final User user = this.userRepository.findById(teacherRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("User not found"));
         user.setId(teacherRequestDTO.getUserId());
         final School school = this.schoolRepository.findById(teacherRequestDTO.getSchoolId()).orElseThrow(() -> new BadRequestServiceException("School not found"));
-        school.setId(teacherRequestDTO.getSchoolId());
         final Teacher teacher = new Teacher();
+        school.setId(teacherRequestDTO.getSchoolId());
         teacher.setName(teacherRequestDTO.getName());
         teacher.setDateOfBirth(teacherRequestDTO.getDateOfBirth());
         teacher.setGender(teacherRequestDTO.getGender());
@@ -46,18 +46,17 @@ public class TeacherService {
         teacher.setSubject(teacherRequestDTO.getSubject());
         teacher.setUser(user);
         teacher.setSchool(school);
-        return new ResponseDTO(Constants.CREATED, this.teacherRepository.save(teacher), HttpStatus.CREATED.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.teacherRepository.save(teacher)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     @Transactional
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.teacherRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.teacherRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
     public ResponseDTO updateStaff(final TeacherResponseDTO staffResponseDTO, final String id) {
-        final Teacher existingTeacher = this.teacherRepository.findById(id)
-                .orElseThrow(() -> new BadRequestServiceException("Teacher not found"));
+        final Teacher existingTeacher = this.teacherRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("Teacher not found"));
 
         if (staffResponseDTO.getName() != null) {
             existingTeacher.setName(staffResponseDTO.getName());
@@ -81,7 +80,7 @@ public class TeacherService {
         if (staffResponseDTO.getSubject() != null) {
             existingTeacher.setSubject(staffResponseDTO.getSubject());
         }
-        return new ResponseDTO(Constants.SUCCESS, this.teacherRepository.save(existingTeacher), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.teacherRepository.save(existingTeacher)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -90,6 +89,6 @@ public class TeacherService {
             throw new BadRequestServiceException("Teacher Id not found");
         }
         this.teacherRepository.deleteById(id);
-        return new ResponseDTO(Constants.DELETED, id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 }

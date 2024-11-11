@@ -41,17 +41,16 @@ public class SectionService {
         section.setCreatedBy(sectionRequestDTO.getCreatedBy());
         section.setUpdatedAt(sectionRequestDTO.getUpdatedAt());
         section.setUpdatedBy(sectionRequestDTO.getUpdatedBy());
-        return new ResponseDTO(Constants.CREATED, this.sectionRepository.save(section), HttpStatus.CREATED.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.sectionRepository.save(section)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.sectionRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.sectionRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
     public ResponseDTO updateSection(final SectionResponseDTO sectionResponseDTO, final String id) {
-        final Section existingSection = this.sectionRepository.findById(id)
-                .orElseThrow(() -> new BadRequestServiceException("Section not found"));
+        final Section existingSection = this.sectionRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("Section not found"));
 
         if (sectionResponseDTO.getSection() != null) {
             existingSection.setSection(sectionResponseDTO.getSection());
@@ -62,7 +61,7 @@ public class SectionService {
         if (sectionResponseDTO.getUpdatedBy() != null) {
             existingSection.setUpdatedBy(sectionResponseDTO.getUpdatedBy());
         }
-        return new ResponseDTO(Constants.SUCCESS, this.sectionRepository.save(existingSection), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.sectionRepository.save(existingSection)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -71,7 +70,6 @@ public class SectionService {
             throw new BadRequestServiceException("Section Id not found");
         }
         this.sectionRepository.deleteById(id);
-        return new ResponseDTO("Successfully deleted.", id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
-
 }

@@ -47,11 +47,11 @@ public class MarkService {
         mark.setCreatedBy(markRequestDTO.getCreatedBy());
         mark.setUpdatedBy(markRequestDTO.getUpdatedBy());
         mark.setMark(markRequestDTO.getMark());
-        return new ResponseDTO(Constants.CREATED, this.markRepository.save(mark), HttpStatus.CREATED.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.markRepository.save(mark)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.markRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.markRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -67,7 +67,7 @@ public class MarkService {
         if (markRequestDTO.getMark() != 0) {
             existingMark.setMark(markRequestDTO.getMark());
         }
-        return new ResponseDTO(Constants.SUCCESS, this.markRepository.save(existingMark), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.markRepository.save(existingMark)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -76,12 +76,30 @@ public class MarkService {
             throw new BadRequestServiceException("Mark Id not found");
         }
         this.markRepository.deleteById(id);
-        return new ResponseDTO("Successfully deleted.", id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     public ResponseDTO findByMark(final Integer mark) {
         final List<Mark> markResponseDTOList = markRepository.findByMarkLessThan(mark);
         return new ResponseDTO(Constants.SUCCESS, markResponseDTOList, HttpStatus.OK.getReasonPhrase());
+    }
+
+    public ResponseDTO OrderByMarkAsc() {
+        final List<Mark> markList = markRepository.findAllOrderByMarkAsc();
+        return new ResponseDTO(Constants.SUCCESS, markList, HttpStatus.OK.getReasonPhrase());
+    }
+
+    public ResponseDTO OrderByMarkDesc() {
+        final List<Mark> markResponseDTOList = markRepository.findAllOrderByMarkDesc();
+        return new ResponseDTO(Constants.SUCCESS, markResponseDTOList, HttpStatus.OK.getReasonPhrase());
+
+//        final List<Mark> marks = markRepository.findAllOrderByMarkDesc();
+//        Mark highestMark = marks.isEmpty() ? null : marks.get(0);
+//        return new ResponseDTO(
+//                Constants.RETRIEVED,
+//                highestMark != null ? highestMark : "No marks found for this student",
+//                HttpStatus.OK.getReasonPhrase()
+//        );
     }
 }
 

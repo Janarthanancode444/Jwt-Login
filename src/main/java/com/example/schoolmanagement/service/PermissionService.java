@@ -37,13 +37,12 @@ public class PermissionService {
         permission.setUpdatedBy(permissionRequestDTO.getUpdatedBy());
         permission.setUser(user);
         permission.setTeacher(teacher);
-        return new ResponseDTO(Constants.CREATED, this.permissionRepository.save(permission), HttpStatus.CREATED.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.permissionRepository.save(permission)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.permissionRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.permissionRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
-
 
     @Transactional
     public ResponseDTO update(final String id, final PermissionRequestDTO permissionRequestDTO) {
@@ -55,8 +54,7 @@ public class PermissionService {
         if (permissionRequestDTO.getCreatedBy() != null) {
             existingSchool.setCreatedBy(permissionRequestDTO.getCreatedBy());
         }
-
-        return new ResponseDTO(Constants.SUCCESS, this.permissionRepository.save(existingSchool), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.permissionRepository.save(existingSchool)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -65,7 +63,7 @@ public class PermissionService {
             throw new BadRequestServiceException("Permission Id not found");
         }
         this.permissionRepository.deleteById(id);
-        return new ResponseDTO("Successfully deleted.", id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
 }

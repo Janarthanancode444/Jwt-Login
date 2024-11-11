@@ -9,6 +9,7 @@ import com.example.schoolmanagement.exception.BadRequestServiceException;
 import com.example.schoolmanagement.repository.SchoolRepository;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
+import com.example.schoolmanagement.util.UtilService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +34,8 @@ public class SchoolService {
         final User user = this.userRepository.findById(schoolRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("User not found"));
         user.setId(schoolRequestDTO.getUserId());
         final School school = new School();
+        validatePhoneSchoolDTO(schoolRequestDTO);
+        validateSchoolDTO(schoolRequestDTO);
         school.setName(schoolRequestDTO.getName());
         school.setAddress(schoolRequestDTO.getAddress());
         school.setPhone(schoolRequestDTO.getPhone());
@@ -42,12 +45,33 @@ public class SchoolService {
         school.setCreatedBy(schoolRequestDTO.getCreatedBy());
         school.setUpdatedAt(schoolRequestDTO.getUpdatedAt());
         school.setUpdatedBy(schoolRequestDTO.getUpdatedBy());
-        return new ResponseDTO(Constants.SUCCESS, this.schoolRepository.save(school), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.schoolRepository.save(school)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
+    private void validateSchoolDTO(final SchoolRequestDTO schoolRequestDTO) {
+        if (!UtilService.emailValidation(schoolRequestDTO.getEmail())) {
+            throw new BadRequestServiceException("Email format wrong");
+        }
+        Object emailFound = schoolRepository.findByEmail(schoolRequestDTO.getEmail());
+        if (emailFound != null) {
+            throw new BadRequestServiceException("Email already exists");
+        }
+
+    }
+
+    private void validatePhoneSchoolDTO(final SchoolRequestDTO schoolRequestDTO) {
+        if (!UtilService.phoneNumberValidation(schoolRequestDTO.getPhone())) {
+            throw new BadRequestServiceException("Phone format wrong");
+        }
+        Object PhoneFound = schoolRepository.findByPhone(schoolRequestDTO.getPhone());
+        if (PhoneFound != null) {
+            throw new BadRequestServiceException("Phone already exists");
+        }
+
+    }
 
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.schoolRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.schoolRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -72,7 +96,7 @@ public class SchoolService {
         if (responseSchoolDTO.getUpdatedBy() != null) {
             existingSchool.setUpdatedBy(responseSchoolDTO.getUpdatedBy());
         }
-        return new ResponseDTO(Constants.SUCCESS, this.schoolRepository.save(existingSchool), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.schoolRepository.save(existingSchool)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -81,7 +105,7 @@ public class SchoolService {
             throw new BadRequestServiceException("School Id not found");
         }
         this.schoolRepository.deleteById(id);
-        return new ResponseDTO(Constants.DELETED, id, HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     public Page<SchoolRequestDTO> searchSchool(String search, Integer page, Integer size, String sortField, String sortDirection) {

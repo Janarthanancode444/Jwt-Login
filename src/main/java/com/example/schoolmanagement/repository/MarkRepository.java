@@ -12,4 +12,10 @@ import java.util.List;
 public interface MarkRepository extends JpaRepository<Mark, String> {
     @Query("select m from Mark m where m.mark < :mark")
     List<Mark> findByMarkLessThan(@Param("mark") Integer mark);
+
+    @Query("SELECT m FROM Mark m ORDER BY m.mark ASC")
+    List<Mark> findAllOrderByMarkAsc();
+
+    @Query("SELECT m FROM Mark m ORDER BY m.mark desc")
+    List<Mark> findAllOrderByMarkDesc();
 }

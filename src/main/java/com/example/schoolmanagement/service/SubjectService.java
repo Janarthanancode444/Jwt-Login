@@ -32,11 +32,11 @@ public class SubjectService {
         subject.setCreatedBy(subjectRequestDTO.getCreatedBy());
         subject.setUpdatedBy(subjectRequestDTO.getUpdatedBy());
         subject.setUser(user);
-        return new ResponseDTO(Constants.SUCCESS, this.subjectRepository.save(subject), HttpStatus.CREATED.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.subjectRepository.save(subject)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     public ResponseDTO retrieve() {
-        return new ResponseDTO(Constants.SUCCESS, this.subjectRepository.findAll(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.subjectRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
@@ -53,8 +53,7 @@ public class SubjectService {
         if (subjectResponseDTO.getUpdatedBy() != null) {
             existingSubject.setUpdatedBy(subjectResponseDTO.getUpdatedBy());
         }
-        return new ResponseDTO(Constants.SUCCESS, this.subjectRepository.save(existingSubject), HttpStatus.OK.getReasonPhrase());
-
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.subjectRepository.save(existingSubject)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
 
@@ -64,7 +63,6 @@ public class SubjectService {
             throw new BadRequestServiceException("Subject Id not found");
         }
         this.subjectRepository.deleteById(id);
-        return new ResponseDTO("Successfully deleted.", id, HttpStatus.OK.getReasonPhrase());
-
+        return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 }

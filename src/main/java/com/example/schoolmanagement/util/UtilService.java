@@ -2,8 +2,8 @@ package com.example.schoolmanagement.util;
 
 import java.util.regex.Pattern;
 
-public class Validate {
-    private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+public class UtilService {
+    private static final String EMAIL_REGEX = "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$";
     private static final String PHONE_REGEX = "^(\\+\\d{1,3}[- ]?)?\\(?\\d{3}\\)?[- ]?\\d{3}[- ]?\\d{4}$";
 
 

@@ -49,4 +49,15 @@ public class MarkController {
         return this.markService.findByMark(mark);
     }
 
+    @GetMapping("/search/ase")
+    public ResponseDTO findAllOrderByMarkAsc() {
+        return this.markService.OrderByMarkAsc();
+    }
+
+    @GetMapping("/search/desc")
+    public ResponseDTO findAllOrderByMarkDesc() {
+        return this.markService.OrderByMarkDesc();
+    }
+
+
 }
