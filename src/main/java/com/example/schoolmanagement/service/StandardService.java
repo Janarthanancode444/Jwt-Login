@@ -22,7 +22,7 @@ public class StandardService {
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
 
-    public StandardService(final StandardRepository standardRepository, SchoolRepository schoolRepository, UserRepository userRepository) {
+    public StandardService(StandardRepository standardRepository, SchoolRepository schoolRepository, UserRepository userRepository) {
         this.standardRepository = standardRepository;
         this.schoolRepository = schoolRepository;
         this.userRepository = userRepository;
@@ -30,11 +30,11 @@ public class StandardService {
 
     @Transactional
     public ResponseDTO create(final StandardRequestDTO standardRequestDTO) {
-        final User user = this.userRepository.findById(standardRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("user not found"));
+        final User user = this.userRepository.findById(standardRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(standardRequestDTO.getUserId());
-        final School school = this.schoolRepository.findById(standardRequestDTO.getSchoolId()).orElseThrow(() -> new BadRequestServiceException("School not found"));
+        final School school = this.schoolRepository.findById(standardRequestDTO.getSchoolId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         school.setId(standardRequestDTO.getSchoolId());
-        final Standard standard = new Standard();
+        final Standard standard = Standard.builder().build();
         standard.setName(standardRequestDTO.getName());
         standard.setTotalStudent(standardRequestDTO.getTotalStudent());
         standard.setSchool(school);
@@ -50,7 +50,7 @@ public class StandardService {
 
     @Transactional
     public ResponseDTO update(final String id, final StandardResponseDTO schoolClassResponse) {
-        final Standard standard = this.standardRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("Class not found"));
+        final Standard standard = this.standardRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
 
         if (schoolClassResponse.getName() != null) {
             standard.setName(schoolClassResponse.getName());
@@ -71,7 +71,7 @@ public class StandardService {
     @Transactional
     public ResponseDTO remove(final String id) {
         if (!this.standardRepository.existsById(id)) {
-            throw new BadRequestServiceException("Class Id not found");
+            throw new BadRequestServiceException(Constants.NOT_FOUND);
         }
         this.standardRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();

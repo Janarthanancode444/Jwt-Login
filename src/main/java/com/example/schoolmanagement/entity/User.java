@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CurrentTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,6 +15,7 @@ import java.time.Instant;
 
 @Data
 @Entity
+@Builder
 @Table(name = "user")
 public class User {
     @Id
@@ -27,7 +29,7 @@ public class User {
     private String email;
     @Column(name = "password")
     private String password;
-    @Column(name="roles")
+    @Column(name = "roles")
     private String roles;
     @Column(name = "created_at")
     @CurrentTimestamp

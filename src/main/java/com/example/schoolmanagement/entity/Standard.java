@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.CurrentTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -15,6 +16,7 @@ import java.time.Instant;
 
 @Data
 @Entity
+@Builder
 @Table(name = "standard")
 public class Standard {
     @Id
@@ -24,7 +26,6 @@ public class Standard {
     private String name;
     @Column(name = "total_student")
     private int totalStudent;
-
     @ManyToOne
     private User User;
     @ManyToOne

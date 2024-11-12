@@ -28,11 +28,11 @@ public class PermissionService {
 
     @Transactional
     public ResponseDTO createPermission(final PermissionRequestDTO permissionRequestDTO) {
-        final User user = this.userRepository.findById(permissionRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("user not found"));
+        final User user = this.userRepository.findById(permissionRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(permissionRequestDTO.getUserId());
-        final Teacher teacher = this.teacherRepository.findById(permissionRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException("Teacher not found"));
+        final Teacher teacher = this.teacherRepository.findById(permissionRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         teacher.setId(permissionRequestDTO.getTeacherId());
-        final Permission permission = new Permission();
+        final Permission permission = Permission.builder().build();
         permission.setCreatedBy(permissionRequestDTO.getCreatedBy());
         permission.setUpdatedBy(permissionRequestDTO.getUpdatedBy());
         permission.setUser(user);
@@ -46,7 +46,7 @@ public class PermissionService {
 
     @Transactional
     public ResponseDTO update(final String id, final PermissionRequestDTO permissionRequestDTO) {
-        final Permission existingSchool = this.permissionRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("Permission not found"));
+        final Permission existingSchool = this.permissionRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
 
         if (permissionRequestDTO.getUpdatedBy() != null) {
             existingSchool.setUpdatedBy(permissionRequestDTO.getUpdatedBy());
@@ -60,7 +60,7 @@ public class PermissionService {
     @Transactional
     public ResponseDTO remove(final String id) {
         if (!this.permissionRepository.existsById(id)) {
-            throw new BadRequestServiceException("Permission Id not found");
+            throw new BadRequestServiceException(Constants.IDDOESNOTEXIST);
         }
         this.permissionRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();

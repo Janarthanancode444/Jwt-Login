@@ -25,6 +25,7 @@ public class MarkService {
     private final StudentRepository studentRepository;
     private final SubjectRepository subjectRepository;
 
+
     public MarkService(MarkRepository markRepository, StudentRepository studentRepository, UserRepository userRepository, SubjectRepository subjectRepository) {
         this.markRepository = markRepository;
         this.userRepository = userRepository;
@@ -33,14 +34,14 @@ public class MarkService {
     }
 
     @Transactional
-    public ResponseDTO createMark(MarkRequestDTO markRequestDTO) {
-        final User user = this.userRepository.findById(markRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("user not found"));
+    public ResponseDTO createMark(final MarkRequestDTO markRequestDTO) {
+        final User user = this.userRepository.findById(markRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(markRequestDTO.getUserId());
-        final Student student = this.studentRepository.findById(markRequestDTO.getStudentId()).orElseThrow(() -> new BadRequestServiceException("Student not found"));
+        final Student student = this.studentRepository.findById(markRequestDTO.getStudentId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         student.setId(markRequestDTO.getStudentId());
-        final Subject subject = this.subjectRepository.findById(markRequestDTO.getSubjectId()).orElseThrow(() -> new BadRequestServiceException("Student not found"));
+        final Subject subject = this.subjectRepository.findById(markRequestDTO.getSubjectId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         subject.setId(markRequestDTO.getSubjectId());
-        final Mark mark = new Mark();
+        final Mark mark = Mark.builder().build();
         mark.setSubject(subject);
         mark.setStudent(student);
         mark.setUser(user);
@@ -56,7 +57,7 @@ public class MarkService {
 
     @Transactional
     public ResponseDTO updateMark(final String id, final MarkRequestDTO markRequestDTO) {
-        final Mark existingMark = this.markRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("Mark not found"));
+        final Mark existingMark = this.markRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.NOT_FOUND));
 
         if (markRequestDTO.getUpdatedBy() != null) {
             existingMark.setUpdatedBy(markRequestDTO.getUpdatedBy());
@@ -73,15 +74,14 @@ public class MarkService {
     @Transactional
     public ResponseDTO remove(final String id) {
         if (!this.markRepository.existsById(id)) {
-            throw new BadRequestServiceException("Mark Id not found");
+            throw new BadRequestServiceException(Constants.NOT_FOUND);
         }
         this.markRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     public ResponseDTO findByMark(final Integer mark) {
-        final List<Mark> markResponseDTOList = markRepository.findByMarkLessThan(mark);
-        return new ResponseDTO(Constants.SUCCESS, markResponseDTOList, HttpStatus.OK.getReasonPhrase());
+        return new ResponseDTO(Constants.SUCCESS, this.markRepository.findByMarkLessThan(mark), HttpStatus.OK.getReasonPhrase());
     }
 
     public ResponseDTO OrderByMarkAsc() {
@@ -92,14 +92,6 @@ public class MarkService {
     public ResponseDTO OrderByMarkDesc() {
         final List<Mark> markResponseDTOList = markRepository.findAllOrderByMarkDesc();
         return new ResponseDTO(Constants.SUCCESS, markResponseDTOList, HttpStatus.OK.getReasonPhrase());
-
-//        final List<Mark> marks = markRepository.findAllOrderByMarkDesc();
-//        Mark highestMark = marks.isEmpty() ? null : marks.get(0);
-//        return new ResponseDTO(
-//                Constants.RETRIEVED,
-//                highestMark != null ? highestMark : "No marks found for this student",
-//                HttpStatus.OK.getReasonPhrase()
-//        );
     }
 }
 

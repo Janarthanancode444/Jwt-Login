@@ -65,7 +65,7 @@ public class JwtService {
 
 
     public ResponseDTO generateToken(String userName) {
-        User user = this.repository.findByName(userName).orElseThrow(() -> new BadCredentialsException("Username not found"));
+        User user = this.repository.findByName(userName).orElseThrow(() -> new BadCredentialsException(Constants.NOT_FOUND));
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRoles());
         return new ResponseDTO(Constants.SUCCESS, createToken(claims, userName), HttpStatus.CREATED.getReasonPhrase());

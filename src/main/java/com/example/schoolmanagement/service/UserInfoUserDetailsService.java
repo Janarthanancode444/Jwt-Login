@@ -2,7 +2,6 @@ package com.example.schoolmanagement.service;
 
 import com.example.schoolmanagement.dto.UserInfoUserDetails;
 import com.example.schoolmanagement.entity.User;
-import com.example.schoolmanagement.entity.UserInfo;
 import com.example.schoolmanagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -25,9 +25,9 @@ public class SubjectService {
 
     @Transactional
     public ResponseDTO createSubject(final SubjectRequestDTO subjectRequestDTO) {
-        final User user = this.userRepository.findById(subjectRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("User not found"));
+        final User user = this.userRepository.findById(subjectRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(subjectRequestDTO.getUserId());
-        final Subject subject = new Subject();
+        final Subject subject = Subject.builder().build();
         subject.setName(subjectRequestDTO.getName());
         subject.setCreatedBy(subjectRequestDTO.getCreatedBy());
         subject.setUpdatedBy(subjectRequestDTO.getUpdatedBy());
@@ -41,7 +41,7 @@ public class SubjectService {
 
     @Transactional
     public ResponseDTO updateSubject(final String id, final SubjectResponseDTO subjectResponseDTO) {
-        final Subject existingSubject = this.subjectRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("subject not found"));
+        final Subject existingSubject = this.subjectRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
 
         if (subjectResponseDTO.getName() != null) {
             existingSubject.setName(subjectResponseDTO.getName());
@@ -60,7 +60,7 @@ public class SubjectService {
     @Transactional
     public ResponseDTO remove(final String id) {
         if (!this.subjectRepository.existsById(id)) {
-            throw new BadRequestServiceException("Subject Id not found");
+            throw new BadRequestServiceException(Constants.IDDOESNOTEXIST);
         }
         this.subjectRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();

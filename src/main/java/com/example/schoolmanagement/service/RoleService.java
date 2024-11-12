@@ -25,9 +25,9 @@ public class RoleService {
 
     @Transactional
     public ResponseDTO createRole(final RoleRequestDTO roleRequestDTO) {
-        final User user = this.userRepository.findById(roleRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("User not found"));
+        final User user = this.userRepository.findById(roleRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(roleRequestDTO.getUserId());
-        final Role role = new Role();
+        final Role role = Role.builder().build();
         role.setName(roleRequestDTO.getName());
         role.setDepartment(roleRequestDTO.getDepartment());
         role.setCreatedAt(roleRequestDTO.getCreatedAt());
@@ -35,7 +35,7 @@ public class RoleService {
         role.setUpdatedAt(roleRequestDTO.getUpdatedAt());
         role.setUpdatedBy(roleRequestDTO.getUpdatedBy());
         role.setUser(user);
-        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.roleRepository.save(role)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
+        return ResponseDTO.builder().message(Constants.CREATED).data(this.roleRepository.save(role)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     public ResponseDTO retrieve() {
@@ -44,7 +44,7 @@ public class RoleService {
 
     @Transactional
     public ResponseDTO update(final RoleResponseDTO roleResponseDTO, final String id) {
-        final Role role = this.roleRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("Role Id not found"));
+        final Role role = this.roleRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
 
         if (roleResponseDTO.getName() != null) {
             role.setName(roleResponseDTO.getName());
@@ -70,7 +70,7 @@ public class RoleService {
     @Transactional
     public ResponseDTO remove(final String id) {
         if (!this.roleRepository.existsById(id)) {
-            throw new BadRequestServiceException("Role Id not found");
+            throw new BadRequestServiceException(Constants.IDDOESNOTEXIST);
         }
         this.roleRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();

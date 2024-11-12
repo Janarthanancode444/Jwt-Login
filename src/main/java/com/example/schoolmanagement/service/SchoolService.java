@@ -18,6 +18,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SchoolService {
 
@@ -31,9 +33,9 @@ public class SchoolService {
 
     @Transactional
     public ResponseDTO createSchool(final SchoolRequestDTO schoolRequestDTO) {
-        final User user = this.userRepository.findById(schoolRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("User not found"));
+        final User user = this.userRepository.findById(schoolRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(schoolRequestDTO.getUserId());
-        final School school = new School();
+        final School school = School.builder().build();
         validatePhoneSchoolDTO(schoolRequestDTO);
         validateSchoolDTO(schoolRequestDTO);
         school.setName(schoolRequestDTO.getName());
@@ -50,24 +52,22 @@ public class SchoolService {
 
     private void validateSchoolDTO(final SchoolRequestDTO schoolRequestDTO) {
         if (!UtilService.emailValidation(schoolRequestDTO.getEmail())) {
-            throw new BadRequestServiceException("Email format wrong");
+            throw new BadRequestServiceException(Constants.EMAIL_PATTERN);
         }
-        Object emailFound = schoolRepository.findByEmail(schoolRequestDTO.getEmail());
+        final List<School> emailFound = this.schoolRepository.findByEmail(schoolRequestDTO.getEmail());
         if (emailFound != null) {
-            throw new BadRequestServiceException("Email already exists");
+            throw new BadRequestServiceException(Constants.EMAIL);
         }
-
     }
 
     private void validatePhoneSchoolDTO(final SchoolRequestDTO schoolRequestDTO) {
         if (!UtilService.phoneNumberValidation(schoolRequestDTO.getPhone())) {
-            throw new BadRequestServiceException("Phone format wrong");
+            throw new BadRequestServiceException(Constants.PHONE_PATTERN);
         }
-        Object PhoneFound = schoolRepository.findByPhone(schoolRequestDTO.getPhone());
+        final List<School> PhoneFound = this.schoolRepository.findByPhone(schoolRequestDTO.getPhone());
         if (PhoneFound != null) {
-            throw new BadRequestServiceException("Phone already exists");
+            throw new BadRequestServiceException(Constants.PHONE);
         }
-
     }
 
     public ResponseDTO retrieve() {
@@ -76,7 +76,7 @@ public class SchoolService {
 
     @Transactional
     public ResponseDTO update(final SchoolResponseDTO responseSchoolDTO, final String id) {
-        final School existingSchool = this.schoolRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("School not found"));
+        final School existingSchool = this.schoolRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
 
         if (responseSchoolDTO.getName() != null) {
             existingSchool.setName(responseSchoolDTO.getName());
@@ -102,18 +102,18 @@ public class SchoolService {
     @Transactional
     public ResponseDTO remove(String id) {
         if (!this.schoolRepository.existsById(id)) {
-            throw new BadRequestServiceException("School Id not found");
+            throw new BadRequestServiceException(Constants.IDDOESNOTEXIST);
         }
         this.schoolRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     public Page<SchoolRequestDTO> searchSchool(String search, Integer page, Integer size, String sortField, String sortDirection) {
-        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
+        final Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
         Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 5, sort);
         final Page<School> school = this.schoolRepository.searchSchool(search, pageable);
         if (school.isEmpty()) {
-            throw new BadRequestServiceException("No data found for the given search criteria");
+            throw new BadRequestServiceException(Constants.NOT_FOUND);
         }
         return school.map(this::convertToSchoolRequestDTO);
     }

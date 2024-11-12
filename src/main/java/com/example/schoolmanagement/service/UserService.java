@@ -27,7 +27,7 @@ public class UserService {
     @Transactional
 
     public ResponseDTO create(final UserRequestDTO userRequestDTO) {
-        final User user = new User();
+        final User user = User.builder().build();
         user.setCreatedAt(userRequestDTO.getCreatedAt());
         user.setCreatedBy(userRequestDTO.getCreatedBy());
         user.setUpdatedAt(userRequestDTO.getUpdatedAt());
@@ -48,8 +48,7 @@ public class UserService {
     @Transactional
     public ResponseDTO updateUser(final UserResponseDTO userResponseDTO, final String id) {
         {
-            final User existingUser = this.userRepository.findById(id)
-                    .orElseThrow(() -> new BadRequestServiceException("User not found"));
+            final User existingUser = this.userRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.User));
 
             if (userResponseDTO.getName() != null) {
                 existingUser.setName(userResponseDTO.getName());
@@ -77,7 +76,7 @@ public class UserService {
     @Transactional
     public ResponseDTO removeUser(final String id) {
         if (!this.userRepository.existsById(id)) {
-            throw new BadRequestServiceException("User not found");
+            throw new BadRequestServiceException(Constants.NOT_FOUND);
         }
         this.userRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();

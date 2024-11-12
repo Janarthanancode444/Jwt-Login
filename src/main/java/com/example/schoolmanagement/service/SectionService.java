@@ -29,11 +29,11 @@ public class SectionService {
 
     @Transactional
     public ResponseDTO createSection(final SectionRequestDTO sectionRequestDTO) {
-        final Standard standard = this.standardRepository.findById(sectionRequestDTO.getStandardId()).orElseThrow(() -> new BadRequestServiceException("Standard not found"));
+        final Standard standard = this.standardRepository.findById(sectionRequestDTO.getStandardId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         standard.setId(sectionRequestDTO.getStandardId());
-        final User user = this.userRepository.findById(sectionRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("user not found"));
+        final User user = this.userRepository.findById(sectionRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(sectionRequestDTO.getUserId());
-        final Section section = new Section();
+        final Section section = Section.builder().build();
         section.setSection(sectionRequestDTO.getSection());
         section.setStandard(standard);
         section.setUser(user);
@@ -50,7 +50,7 @@ public class SectionService {
 
     @Transactional
     public ResponseDTO updateSection(final SectionResponseDTO sectionResponseDTO, final String id) {
-        final Section existingSection = this.sectionRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("Section not found"));
+        final Section existingSection = this.sectionRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
 
         if (sectionResponseDTO.getSection() != null) {
             existingSection.setSection(sectionResponseDTO.getSection());
@@ -67,7 +67,7 @@ public class SectionService {
     @Transactional
     public ResponseDTO remove(final String id) {
         if (!this.sectionRepository.existsById(id)) {
-            throw new BadRequestServiceException("Section Id not found");
+            throw new BadRequestServiceException(Constants.NOT_FOUND);
         }
         this.sectionRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();

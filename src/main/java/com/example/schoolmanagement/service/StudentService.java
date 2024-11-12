@@ -11,9 +11,12 @@ import com.example.schoolmanagement.repository.StudentRepository;
 import com.example.schoolmanagement.repository.TeacherRepository;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
+import com.example.schoolmanagement.util.UtilService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class StudentService {
@@ -29,11 +32,13 @@ public class StudentService {
 
     @Transactional
     public ResponseDTO createStudent(final StudentRequestDTO studentRequestDTO) {
-        final User user = this.userRepository.findById(studentRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException("User not found"));
+        final User user = this.userRepository.findById(studentRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(studentRequestDTO.getUserId());
-        final Student student = new Student();
-        final Teacher teacher = this.teacherRepository.findById(studentRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException("Teacher not found"));
+        final Student student = Student.builder().build();
+        final Teacher teacher = this.teacherRepository.findById(studentRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         teacher.setId(studentRequestDTO.getTeacherId());
+        validateEmail(studentRequestDTO);
+        validatePhone(studentRequestDTO);
         student.setName(studentRequestDTO.getName());
         student.setAddress(studentRequestDTO.getAddress());
         student.setPhone(studentRequestDTO.getPhone());
@@ -49,13 +54,33 @@ public class StudentService {
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.studentRepository.save(student)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
+    private void validateEmail(final StudentRequestDTO studentRequestDTO) {
+        if (!UtilService.emailValidation(studentRequestDTO.getEmail())) {
+            throw new BadRequestServiceException(Constants.EMAIL_PATTERN);
+        }
+        final List<Student> emailFound = this.studentRepository.findByEmail(studentRequestDTO.getEmail());
+        if (emailFound != null) {
+            throw new BadRequestServiceException(Constants.EMAIL);
+        }
+    }
+
+    private void validatePhone(final StudentRequestDTO studentRequestDTO) {
+        if (!UtilService.phoneNumberValidation(studentRequestDTO.getPhone())) {
+            throw new BadRequestServiceException(Constants.PHONE_PATTERN);
+        }
+        final List<Student> phoneFound = this.studentRepository.findByPhone(studentRequestDTO.getPhone());
+        if (phoneFound != null) {
+            throw new BadRequestServiceException(Constants.PHONE);
+        }
+    }
+
     public ResponseDTO retrieve() {
         return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.studentRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     @Transactional
     public ResponseDTO update(final StudentResponseDTO studentResponseDTO, final String id) {
-        final Student existingStudent = this.studentRepository.findById(id).orElseThrow(() -> new BadRequestServiceException("student not found"));
+        final Student existingStudent = this.studentRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
 
         if (studentResponseDTO.getName() != null) {
             existingStudent.setName(studentResponseDTO.getName());
@@ -93,7 +118,7 @@ public class StudentService {
     @Transactional
     public ResponseDTO remove(final String id) {
         if (!this.studentRepository.existsById(id)) {
-            throw new BadRequestServiceException("Student Id not found");
+            throw new BadRequestServiceException(Constants.NOT_FOUND);
         }
         this.studentRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
