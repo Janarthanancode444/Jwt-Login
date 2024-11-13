@@ -27,7 +27,7 @@ public class Standard {
     @Column(name = "total_student")
     private int totalStudent;
     @ManyToOne
-    private User User;
+    private User user;
     @ManyToOne
     private School school;
     @Column(name = "created_at")

@@ -35,22 +35,11 @@ public class TeacherService {
     public ResponseDTO createStaff(final TeacherRequestDTO teacherRequestDTO) {
         final User user = this.userRepository.findById(teacherRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(teacherRequestDTO.getUserId());
-        final School school = this.schoolRepository.findById(teacherRequestDTO.getSchoolId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
-        final Teacher teacher = Teacher.builder().build();
+        final School schoolId = this.schoolRepository.findById(teacherRequestDTO.getSchoolId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
+        schoolId.setId(teacherRequestDTO.getSchoolId());
         validateEmail(teacherRequestDTO);
         validatePhone(teacherRequestDTO);
-        school.setId(teacherRequestDTO.getSchoolId());
-        teacher.setName(teacherRequestDTO.getName());
-        teacher.setDateOfBirth(teacherRequestDTO.getDateOfBirth());
-        teacher.setGender(teacherRequestDTO.getGender());
-        teacher.setAddress(teacherRequestDTO.getAddress());
-        teacher.setPhone(teacherRequestDTO.getPhone());
-        teacher.setEmail((teacherRequestDTO.getEmail()));
-        teacher.setCreatedBy(teacherRequestDTO.getCreatedBy());
-        teacher.setUpdatedBy(teacherRequestDTO.getUpdatedBy());
-        teacher.setSubject(teacherRequestDTO.getSubject());
-        teacher.setUser(user);
-        teacher.setSchool(school);
+        final Teacher teacher = Teacher.builder().school(schoolId).name(teacherRequestDTO.getName()).dateOfBirth(teacherRequestDTO.getDateOfBirth()).gender(teacherRequestDTO.getGender()).address(teacherRequestDTO.getAddress()).phone(teacherRequestDTO.getPhone()).email(teacherRequestDTO.getEmail()).createdBy(teacherRequestDTO.getCreatedBy()).updatedBy(teacherRequestDTO.getUpdatedBy()).subject(teacherRequestDTO.getSubject()).user(user).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.teacherRepository.save(teacher)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
@@ -82,7 +71,6 @@ public class TeacherService {
     @Transactional
     public ResponseDTO updateStaff(final TeacherResponseDTO staffResponseDTO, final String id) {
         final Teacher existingTeacher = this.teacherRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
-
         if (staffResponseDTO.getName() != null) {
             existingTeacher.setName(staffResponseDTO.getName());
         }
@@ -101,7 +89,6 @@ public class TeacherService {
         if (staffResponseDTO.getGender() != null) {
             existingTeacher.setGender(staffResponseDTO.getGender());
         }
-
         if (staffResponseDTO.getSubject() != null) {
             existingTeacher.setSubject(staffResponseDTO.getSubject());
         }

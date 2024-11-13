@@ -25,18 +25,8 @@ public class UserService {
     }
 
     @Transactional
-
     public ResponseDTO create(final UserRequestDTO userRequestDTO) {
-        final User user = User.builder().build();
-        user.setCreatedAt(userRequestDTO.getCreatedAt());
-        user.setCreatedBy(userRequestDTO.getCreatedBy());
-        user.setUpdatedAt(userRequestDTO.getUpdatedAt());
-        user.setUpdatedBy(userRequestDTO.getUpdatedBy());
-        user.setName(userRequestDTO.getName());
-        user.setPhone(userRequestDTO.getPhone());
-        user.setEmail(userRequestDTO.getEmail());
-        user.setRoles(userRequestDTO.getRoles());
-        user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
+        final User user = User.builder().createdBy(userRequestDTO.getCreatedBy()).updatedBy(userRequestDTO.getUpdatedBy()).name(userRequestDTO.getName()).phone(userRequestDTO.getPhone()).email(userRequestDTO.getEmail()).password(passwordEncoder.encode(userRequestDTO.getPassword())).roles(userRequestDTO.getRoles()).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.userRepository.save(user)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 

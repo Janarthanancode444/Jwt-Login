@@ -27,14 +27,7 @@ public class RoleService {
     public ResponseDTO createRole(final RoleRequestDTO roleRequestDTO) {
         final User user = this.userRepository.findById(roleRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(roleRequestDTO.getUserId());
-        final Role role = Role.builder().build();
-        role.setName(roleRequestDTO.getName());
-        role.setDepartment(roleRequestDTO.getDepartment());
-        role.setCreatedAt(roleRequestDTO.getCreatedAt());
-        role.setCreatedBy(roleRequestDTO.getCreatedBy());
-        role.setUpdatedAt(roleRequestDTO.getUpdatedAt());
-        role.setUpdatedBy(roleRequestDTO.getUpdatedBy());
-        role.setUser(user);
+        final Role role = Role.builder().name(roleRequestDTO.getName()).department(roleRequestDTO.getDepartment()).createdBy(roleRequestDTO.getCreatedBy()).updatedBy(roleRequestDTO.getUpdatedBy()).user(user).build();
         return ResponseDTO.builder().message(Constants.CREATED).data(this.roleRepository.save(role)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 

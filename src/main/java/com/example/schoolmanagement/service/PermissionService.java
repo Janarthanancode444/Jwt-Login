@@ -32,11 +32,12 @@ public class PermissionService {
         user.setId(permissionRequestDTO.getUserId());
         final Teacher teacher = this.teacherRepository.findById(permissionRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         teacher.setId(permissionRequestDTO.getTeacherId());
-        final Permission permission = Permission.builder().build();
-        permission.setCreatedBy(permissionRequestDTO.getCreatedBy());
-        permission.setUpdatedBy(permissionRequestDTO.getUpdatedBy());
-        permission.setUser(user);
-        permission.setTeacher(teacher);
+        final Permission permission = Permission.builder()
+                .createdBy(permissionRequestDTO.getCreatedBy())
+                .updatedBy(permissionRequestDTO.getUpdatedBy())
+                .teacher(teacher)
+                .user(user)
+                .build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.permissionRepository.save(permission)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 

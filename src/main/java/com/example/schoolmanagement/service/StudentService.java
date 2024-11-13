@@ -34,23 +34,11 @@ public class StudentService {
     public ResponseDTO createStudent(final StudentRequestDTO studentRequestDTO) {
         final User user = this.userRepository.findById(studentRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(studentRequestDTO.getUserId());
-        final Student student = Student.builder().build();
         final Teacher teacher = this.teacherRepository.findById(studentRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         teacher.setId(studentRequestDTO.getTeacherId());
         validateEmail(studentRequestDTO);
         validatePhone(studentRequestDTO);
-        student.setName(studentRequestDTO.getName());
-        student.setAddress(studentRequestDTO.getAddress());
-        student.setPhone(studentRequestDTO.getPhone());
-        student.setGender(studentRequestDTO.getGender());
-        student.setDateOfBirth(studentRequestDTO.getDateOfBirth());
-        student.setFathersName(studentRequestDTO.getFathersName());
-        student.setMothersName(studentRequestDTO.getMothersName());
-        student.setCreatedBy(studentRequestDTO.getCreatedBy());
-        student.setUpdatedBy(studentRequestDTO.getUpdatedBy());
-        student.setEmail(studentRequestDTO.getEmail());
-        student.setUser(user);
-        student.setTeacher(teacher);
+        final Student student = Student.builder().name(studentRequestDTO.getName()).address(studentRequestDTO.getAddress()).phone(studentRequestDTO.getPhone()).gender(studentRequestDTO.getGender()).dateOfBirth(studentRequestDTO.getDateOfBirth()).fathersName(studentRequestDTO.getFathersName()).mothersName(studentRequestDTO.getMothersName()).createdBy(studentRequestDTO.getCreatedBy()).updatedBy(studentRequestDTO.getUpdatedBy()).email(studentRequestDTO.getEmail()).user(user).teacher(teacher).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.studentRepository.save(student)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 

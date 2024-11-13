@@ -34,13 +34,14 @@ public class StandardService {
         user.setId(standardRequestDTO.getUserId());
         final School school = this.schoolRepository.findById(standardRequestDTO.getSchoolId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         school.setId(standardRequestDTO.getSchoolId());
-        final Standard standard = Standard.builder().build();
-        standard.setName(standardRequestDTO.getName());
-        standard.setTotalStudent(standardRequestDTO.getTotalStudent());
-        standard.setSchool(school);
-        standard.setCreatedBy(standardRequestDTO.getCreatedBy());
-        standard.setUpdatedBy(standardRequestDTO.getUpdatedBy());
-        standard.setUser(user);
+        final Standard standard = Standard.builder()
+                .name(standardRequestDTO.getName())
+                .totalStudent(standardRequestDTO.getTotalStudent())
+                .school(school)
+                .createdBy(standardRequestDTO.getCreatedBy())
+                .updatedBy(standardRequestDTO.getUpdatedBy())
+                .user(user)
+                .build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.standardRepository.save(standard)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 

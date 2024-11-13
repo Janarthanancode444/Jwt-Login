@@ -33,7 +33,7 @@ public class Permission {
     @Column(name = "updated_by", nullable = true)
     private String updatedBy;
     @ManyToOne
-    private User User;
+    private User user;
     @ManyToOne
     private Teacher teacher;
 }

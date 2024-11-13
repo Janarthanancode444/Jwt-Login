@@ -35,18 +35,9 @@ public class SchoolService {
     public ResponseDTO createSchool(final SchoolRequestDTO schoolRequestDTO) {
         final User user = this.userRepository.findById(schoolRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(schoolRequestDTO.getUserId());
-        final School school = School.builder().build();
         validatePhoneSchoolDTO(schoolRequestDTO);
         validateSchoolDTO(schoolRequestDTO);
-        school.setName(schoolRequestDTO.getName());
-        school.setAddress(schoolRequestDTO.getAddress());
-        school.setPhone(schoolRequestDTO.getPhone());
-        school.setEmail(schoolRequestDTO.getEmail());
-        school.setUser(user);
-        school.setCreatedAt(schoolRequestDTO.getCreatedAt());
-        school.setCreatedBy(schoolRequestDTO.getCreatedBy());
-        school.setUpdatedAt(schoolRequestDTO.getUpdatedAt());
-        school.setUpdatedBy(schoolRequestDTO.getUpdatedBy());
+        final School school = School.builder().name(schoolRequestDTO.getName()).address(schoolRequestDTO.getAddress()).phone(schoolRequestDTO.getPhone()).email(schoolRequestDTO.getEmail()).user(user).createdBy(schoolRequestDTO.getCreatedBy()).updatedBy(schoolRequestDTO.getUpdatedBy()).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.schoolRepository.save(school)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
@@ -100,7 +91,7 @@ public class SchoolService {
     }
 
     @Transactional
-    public ResponseDTO remove(String id) {
+    public ResponseDTO remove(final String id) {
         if (!this.schoolRepository.existsById(id)) {
             throw new BadRequestServiceException(Constants.IDDOESNOTEXIST);
         }
@@ -108,7 +99,7 @@ public class SchoolService {
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
-    public Page<SchoolRequestDTO> searchSchool(String search, Integer page, Integer size, String sortField, String sortDirection) {
+    public Page<SchoolRequestDTO> searchSchool(final String search, final Integer page, final Integer size, final String sortField, final String sortDirection) {
         final Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
         Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 5, sort);
         final Page<School> school = this.schoolRepository.searchSchool(search, pageable);

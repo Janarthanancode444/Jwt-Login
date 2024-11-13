@@ -33,14 +33,7 @@ public class SectionService {
         standard.setId(sectionRequestDTO.getStandardId());
         final User user = this.userRepository.findById(sectionRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(sectionRequestDTO.getUserId());
-        final Section section = Section.builder().build();
-        section.setSection(sectionRequestDTO.getSection());
-        section.setStandard(standard);
-        section.setUser(user);
-        section.setCreatedAt(sectionRequestDTO.getCreatedAt());
-        section.setCreatedBy(sectionRequestDTO.getCreatedBy());
-        section.setUpdatedAt(sectionRequestDTO.getUpdatedAt());
-        section.setUpdatedBy(sectionRequestDTO.getUpdatedBy());
+        final Section section = Section.builder().standard(standard).user(user).section(sectionRequestDTO.getSection()).createdBy(sectionRequestDTO.getCreatedBy()).updatedBy(sectionRequestDTO.getUpdatedBy()).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.sectionRepository.save(section)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 

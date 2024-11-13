@@ -16,8 +16,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class MarkService {
     private final MarkRepository markRepository;
@@ -41,13 +39,7 @@ public class MarkService {
         student.setId(markRequestDTO.getStudentId());
         final Subject subject = this.subjectRepository.findById(markRequestDTO.getSubjectId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         subject.setId(markRequestDTO.getSubjectId());
-        final Mark mark = Mark.builder().build();
-        mark.setSubject(subject);
-        mark.setStudent(student);
-        mark.setUser(user);
-        mark.setCreatedBy(markRequestDTO.getCreatedBy());
-        mark.setUpdatedBy(markRequestDTO.getUpdatedBy());
-        mark.setMark(markRequestDTO.getMark());
+        final Mark mark = Mark.builder().subject(subject).student(student).user(user).createdBy(markRequestDTO.getCreatedBy()).updatedBy(markRequestDTO.getUpdatedBy()).mark(markRequestDTO.getMark()).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.markRepository.save(mark)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
@@ -85,13 +77,11 @@ public class MarkService {
     }
 
     public ResponseDTO OrderByMarkAsc() {
-        final List<Mark> markList = markRepository.findAllOrderByMarkAsc();
-        return new ResponseDTO(Constants.SUCCESS, markList, HttpStatus.OK.getReasonPhrase());
+        return new ResponseDTO(Constants.SUCCESS, this.markRepository.findAllOrderByMarkAsc(), HttpStatus.OK.getReasonPhrase());
     }
 
     public ResponseDTO OrderByMarkDesc() {
-        final List<Mark> markResponseDTOList = markRepository.findAllOrderByMarkDesc();
-        return new ResponseDTO(Constants.SUCCESS, markResponseDTOList, HttpStatus.OK.getReasonPhrase());
+        return new ResponseDTO(Constants.SUCCESS, this.markRepository.findAllOrderByMarkDesc(), HttpStatus.OK.getReasonPhrase());
     }
 }
 

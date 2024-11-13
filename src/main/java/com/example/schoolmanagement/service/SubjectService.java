@@ -27,11 +27,7 @@ public class SubjectService {
     public ResponseDTO createSubject(final SubjectRequestDTO subjectRequestDTO) {
         final User user = this.userRepository.findById(subjectRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(subjectRequestDTO.getUserId());
-        final Subject subject = Subject.builder().build();
-        subject.setName(subjectRequestDTO.getName());
-        subject.setCreatedBy(subjectRequestDTO.getCreatedBy());
-        subject.setUpdatedBy(subjectRequestDTO.getUpdatedBy());
-        subject.setUser(user);
+        final Subject subject = Subject.builder().name(subjectRequestDTO.getName()).createdBy(subjectRequestDTO.getCreatedBy()).updatedBy(subjectRequestDTO.getUpdatedBy()).user(user).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.subjectRepository.save(subject)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
@@ -42,11 +38,9 @@ public class SubjectService {
     @Transactional
     public ResponseDTO updateSubject(final String id, final SubjectResponseDTO subjectResponseDTO) {
         final Subject existingSubject = this.subjectRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
-
         if (subjectResponseDTO.getName() != null) {
             existingSubject.setName(subjectResponseDTO.getName());
         }
-
         if (subjectResponseDTO.getCreatedBy() != null) {
             existingSubject.setCreatedBy(subjectResponseDTO.getCreatedBy());
         }
@@ -55,7 +49,6 @@ public class SubjectService {
         }
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.subjectRepository.save(existingSubject)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
-
 
     @Transactional
     public ResponseDTO remove(final String id) {

@@ -63,6 +63,4 @@ public class UserController {
             throw new UsernameNotFoundException(Constants.NOT_FOUND);
         }
     }
-
-
 }
