@@ -68,7 +68,7 @@ public class JwtService {
         User user = this.repository.findByName(userName).orElseThrow(() -> new BadCredentialsException(Constants.NOT_FOUND));
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRoles());
-        return new ResponseDTO(Constants.SUCCESS, createToken(claims, userName), HttpStatus.CREATED.getReasonPhrase());
+        return new ResponseDTO(Constants.CREATED, createToken(claims, userName), HttpStatus.OK.getReasonPhrase());
     }
 
     private String createToken(Map<String, Object> claims, String userName) {

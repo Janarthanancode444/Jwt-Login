@@ -8,6 +8,7 @@ import java.time.Instant;
 public class SubjectRequestDTO {
     private String name;
     private String userId;
+    private String standardId;
     private Instant createdAt;
     private String createdBy;
     private Instant updatedAt;

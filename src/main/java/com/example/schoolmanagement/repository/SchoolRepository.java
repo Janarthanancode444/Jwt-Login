@@ -19,5 +19,6 @@ public interface SchoolRepository extends JpaRepository<School, String> {
 
     List<School> findByEmail(String email);
 
+
     List<School> findByPhone(String phone);
 }

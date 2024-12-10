@@ -11,6 +11,7 @@ import com.example.schoolmanagement.repository.SchoolRepository;
 import com.example.schoolmanagement.repository.StandardRepository;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
+import com.example.schoolmanagement.util.AuthenticationService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,13 @@ public class StandardService {
     private final StandardRepository standardRepository;
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
+    private final AuthenticationService authenticationService;
 
-    public StandardService(StandardRepository standardRepository, SchoolRepository schoolRepository, UserRepository userRepository) {
+    public StandardService(StandardRepository standardRepository, SchoolRepository schoolRepository, UserRepository userRepository, AuthenticationService authenticationService) {
         this.standardRepository = standardRepository;
         this.schoolRepository = schoolRepository;
         this.userRepository = userRepository;
+        this.authenticationService = authenticationService;
     }
 
     @Transactional
@@ -34,14 +37,7 @@ public class StandardService {
         user.setId(standardRequestDTO.getUserId());
         final School school = this.schoolRepository.findById(standardRequestDTO.getSchoolId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         school.setId(standardRequestDTO.getSchoolId());
-        final Standard standard = Standard.builder()
-                .name(standardRequestDTO.getName())
-                .totalStudent(standardRequestDTO.getTotalStudent())
-                .school(school)
-                .createdBy(standardRequestDTO.getCreatedBy())
-                .updatedBy(standardRequestDTO.getUpdatedBy())
-                .user(user)
-                .build();
+        final Standard standard = Standard.builder().name(standardRequestDTO.getName()).totalStudent(standardRequestDTO.getTotalStudent()).school(school).createdBy(authenticationService.getCurrentUser()).updatedBy(authenticationService.getCurrentUser()).user(user).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.standardRepository.save(standard)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
@@ -60,12 +56,8 @@ public class StandardService {
             standard.setTotalStudent(schoolClassResponse.getTotalStudent());
         }
         if (schoolClassResponse.getUpdatedBy() != null) {
-            standard.setUpdatedBy(schoolClassResponse.getUpdatedBy());
+            standard.setUpdatedBy(authenticationService.getCurrentUser());
         }
-        if (schoolClassResponse.getCreatedBy() != null) {
-            standard.setCreatedBy(schoolClassResponse.getCreatedBy());
-        }
-
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.standardRepository.save(standard)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 

@@ -9,6 +9,7 @@ import com.example.schoolmanagement.exception.BadRequestServiceException;
 import com.example.schoolmanagement.repository.RoleRepository;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
+import com.example.schoolmanagement.util.AuthenticationService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,17 +18,19 @@ import org.springframework.stereotype.Service;
 public class RoleService {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
 
-    public RoleService(RoleRepository roleRepository, UserRepository userRepository) {
+    public RoleService(RoleRepository roleRepository, UserRepository userRepository, AuthenticationService authenticationService) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
+        this.authenticationService = authenticationService;
     }
 
     @Transactional
     public ResponseDTO createRole(final RoleRequestDTO roleRequestDTO) {
         final User user = this.userRepository.findById(roleRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
         user.setId(roleRequestDTO.getUserId());
-        final Role role = Role.builder().name(roleRequestDTO.getName()).department(roleRequestDTO.getDepartment()).createdBy(roleRequestDTO.getCreatedBy()).updatedBy(roleRequestDTO.getUpdatedBy()).user(user).build();
+        final Role role = Role.builder().name(roleRequestDTO.getName()).department(roleRequestDTO.getDepartment()).createdBy(authenticationService.getCurrentUser()).updatedBy(authenticationService.getCurrentUser()).user(user).build();
         return ResponseDTO.builder().message(Constants.CREATED).data(this.roleRepository.save(role)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
@@ -51,11 +54,8 @@ public class RoleService {
         if (roleResponseDTO.getDepartment() != null) {
             role.setDepartment(roleResponseDTO.getDepartment());
         }
-        if (roleResponseDTO.getCreatedBy() != null) {
-            role.setCreatedBy(roleResponseDTO.getCreatedBy());
-        }
         if (roleResponseDTO.getUpdatedBy() != null) {
-            role.setUpdatedBy(roleResponseDTO.getUpdatedBy());
+            role.setUpdatedBy(authenticationService.getCurrentUser());
         }
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.roleRepository.save(role)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }

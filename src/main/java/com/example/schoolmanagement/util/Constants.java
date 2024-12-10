@@ -21,5 +21,6 @@ public class Constants {
     public static final String EMAIL = "Already Exist Email Id";
     public static final String PHONE = "Already Exist Phone No";
     public static final String User = " Id does not exist";
+    public static final String REQUEST = "Request successful";
 
 }

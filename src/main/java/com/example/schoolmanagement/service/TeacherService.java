@@ -1,6 +1,7 @@
 package com.example.schoolmanagement.service;
 
 import com.example.schoolmanagement.dto.ResponseDTO;
+import com.example.schoolmanagement.dto.SchoolUserRecord;
 import com.example.schoolmanagement.dto.TeacherRequestDTO;
 import com.example.schoolmanagement.dto.TeacherResponseDTO;
 import com.example.schoolmanagement.entity.School;
@@ -10,25 +11,30 @@ import com.example.schoolmanagement.exception.BadRequestServiceException;
 import com.example.schoolmanagement.repository.SchoolRepository;
 import com.example.schoolmanagement.repository.TeacherRepository;
 import com.example.schoolmanagement.repository.UserRepository;
+import com.example.schoolmanagement.util.AuthenticationService;
 import com.example.schoolmanagement.util.Constants;
 import com.example.schoolmanagement.util.UtilService;
+import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TeacherService {
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
     private final SchoolRepository schoolRepository;
+    private final AuthenticationService authenticationService;
 
-    public TeacherService(TeacherRepository teacherRepository, UserRepository userRepository, SchoolRepository schoolRepository) {
+    public TeacherService(TeacherRepository teacherRepository, UserRepository userRepository, SchoolRepository schoolRepository, AuthenticationService authenticationService) {
 
         this.userRepository = userRepository;
         this.teacherRepository = teacherRepository;
         this.schoolRepository = schoolRepository;
+        this.authenticationService = authenticationService;
     }
 
     @Transactional
@@ -37,28 +43,28 @@ public class TeacherService {
         user.setId(teacherRequestDTO.getUserId());
         final School schoolId = this.schoolRepository.findById(teacherRequestDTO.getSchoolId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         schoolId.setId(teacherRequestDTO.getSchoolId());
-        validateEmail(teacherRequestDTO);
-        validatePhone(teacherRequestDTO);
-        final Teacher teacher = Teacher.builder().school(schoolId).name(teacherRequestDTO.getName()).dateOfBirth(teacherRequestDTO.getDateOfBirth()).gender(teacherRequestDTO.getGender()).address(teacherRequestDTO.getAddress()).phone(teacherRequestDTO.getPhone()).email(teacherRequestDTO.getEmail()).createdBy(teacherRequestDTO.getCreatedBy()).updatedBy(teacherRequestDTO.getUpdatedBy()).subject(teacherRequestDTO.getSubject()).user(user).build();
-        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.teacherRepository.save(teacher)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
+        this.validateEmail(teacherRequestDTO);
+        this.validatePhone(teacherRequestDTO);
+        final Teacher teacher = Teacher.builder().school(schoolId).name(teacherRequestDTO.getName()).dateOfBirth(teacherRequestDTO.getDateOfBirth()).gender(teacherRequestDTO.getGender()).address(teacherRequestDTO.getAddress()).phone(teacherRequestDTO.getPhone()).email(teacherRequestDTO.getEmail()).createdBy(authenticationService.getCurrentUser()).updatedBy(authenticationService.getCurrentUser()).subject(teacherRequestDTO.getSubject()).user(user).build();
+        return ResponseDTO.builder().message(Constants.CREATED).data(this.teacherRepository.save(teacher)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     private void validateEmail(final TeacherRequestDTO teacherRequestDTO) {
-        if (!UtilService.emailValidation(teacherRequestDTO.getEmail())) {
+        if (UtilService.emailValidation(teacherRequestDTO.getEmail())) {
             throw new BadRequestServiceException(Constants.EMAIL_PATTERN);
         }
         final List<Teacher> emailFound = this.teacherRepository.findByEmail(teacherRequestDTO.getEmail());
-        if (emailFound != null) {
+        if (!emailFound.isEmpty()) {
             throw new BadRequestServiceException(Constants.EMAIL);
         }
     }
 
     private void validatePhone(final TeacherRequestDTO teacherRequestDTO) {
-        if (!UtilService.phoneNumberValidation(teacherRequestDTO.getPhone())) {
+        if (UtilService.phoneNumberValidation(teacherRequestDTO.getPhone())) {
             throw new BadRequestServiceException(Constants.PHONE_PATTERN);
         }
         final List<Teacher> phoneFound = this.teacherRepository.findByPhone(teacherRequestDTO.getPhone());
-        if (phoneFound != null) {
+        if (!phoneFound.isEmpty()) {
             throw new BadRequestServiceException(Constants.PHONE);
         }
     }
@@ -102,5 +108,17 @@ public class TeacherService {
         }
         this.teacherRepository.deleteById(id);
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
+    }
+
+    public ResponseDTO search(final String school, final String subject, final String range, final Boolean lesserThan) {
+        final List<Tuple> result = this.teacherRepository.search(school, subject, range, lesserThan);
+        return ResponseDTO.builder().message(Constants.RETRIEVED).data(result.stream()
+                .map(tuple -> new SchoolUserRecord(
+                        tuple.get("teacherName", String.class),
+                        tuple.get("teacherSchool", String.class),
+                        tuple.get("teacherHandlingSection", String.class),
+                        tuple.get("teacherId", String.class)
+                ))
+                .collect(Collectors.toList())).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 }

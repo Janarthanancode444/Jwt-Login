@@ -11,6 +11,7 @@ import com.example.schoolmanagement.repository.StudentRepository;
 import com.example.schoolmanagement.repository.TeacherRepository;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
+import com.example.schoolmanagement.util.AuthenticationService;
 import com.example.schoolmanagement.util.UtilService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -23,11 +24,13 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final TeacherRepository teacherRepository;
+    private final AuthenticationService authenticationService;
 
-    public StudentService(StudentRepository studentRepository, UserRepository userRepository, TeacherRepository teacherRepository) {
+    public StudentService(StudentRepository studentRepository, UserRepository userRepository, TeacherRepository teacherRepository, AuthenticationService authenticationService) {
         this.studentRepository = studentRepository;
         this.teacherRepository = teacherRepository;
         this.userRepository = userRepository;
+        this.authenticationService = authenticationService;
     }
 
     @Transactional
@@ -36,28 +39,28 @@ public class StudentService {
         user.setId(studentRequestDTO.getUserId());
         final Teacher teacher = this.teacherRepository.findById(studentRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         teacher.setId(studentRequestDTO.getTeacherId());
-        validateEmail(studentRequestDTO);
-        validatePhone(studentRequestDTO);
-        final Student student = Student.builder().name(studentRequestDTO.getName()).address(studentRequestDTO.getAddress()).phone(studentRequestDTO.getPhone()).gender(studentRequestDTO.getGender()).dateOfBirth(studentRequestDTO.getDateOfBirth()).fathersName(studentRequestDTO.getFathersName()).mothersName(studentRequestDTO.getMothersName()).createdBy(studentRequestDTO.getCreatedBy()).updatedBy(studentRequestDTO.getUpdatedBy()).email(studentRequestDTO.getEmail()).user(user).teacher(teacher).build();
+        this.validateEmail(studentRequestDTO);
+        this.validatePhone(studentRequestDTO);
+        final Student student = Student.builder().name(studentRequestDTO.getName()).address(studentRequestDTO.getAddress()).phone(studentRequestDTO.getPhone()).gender(studentRequestDTO.getGender()).dateOfBirth(studentRequestDTO.getDateOfBirth()).fathersName(studentRequestDTO.getFathersName()).mothersName(studentRequestDTO.getMothersName()).createdBy(authenticationService.getCurrentUser()).updatedBy(authenticationService.getCurrentUser()).email(studentRequestDTO.getEmail()).user(user).teacher(teacher).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.studentRepository.save(student)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
     private void validateEmail(final StudentRequestDTO studentRequestDTO) {
-        if (!UtilService.emailValidation(studentRequestDTO.getEmail())) {
+        if (UtilService.emailValidation(studentRequestDTO.getEmail())) {
             throw new BadRequestServiceException(Constants.EMAIL_PATTERN);
         }
         final List<Student> emailFound = this.studentRepository.findByEmail(studentRequestDTO.getEmail());
-        if (emailFound != null) {
+        if (!emailFound.isEmpty()) {
             throw new BadRequestServiceException(Constants.EMAIL);
         }
     }
 
     private void validatePhone(final StudentRequestDTO studentRequestDTO) {
-        if (!UtilService.phoneNumberValidation(studentRequestDTO.getPhone())) {
+        if (UtilService.phoneNumberValidation(studentRequestDTO.getPhone())) {
             throw new BadRequestServiceException(Constants.PHONE_PATTERN);
         }
         final List<Student> phoneFound = this.studentRepository.findByPhone(studentRequestDTO.getPhone());
-        if (phoneFound != null) {
+        if (!phoneFound.isEmpty()) {
             throw new BadRequestServiceException(Constants.PHONE);
         }
     }
@@ -89,10 +92,7 @@ public class StudentService {
             existingStudent.setGender(studentResponseDTO.getGender());
         }
         if (studentResponseDTO.getUpdatedBy() != null) {
-            existingStudent.setUpdatedBy(studentResponseDTO.getUpdatedBy());
-        }
-        if (studentResponseDTO.getCreatedBy() != null) {
-            existingStudent.setCreatedBy(studentResponseDTO.getCreatedBy());
+            existingStudent.setUpdatedBy(authenticationService.getCurrentUser());
         }
         if (studentResponseDTO.getFathersName() != null) {
             existingStudent.setFathersName(studentResponseDTO.getFathersName());

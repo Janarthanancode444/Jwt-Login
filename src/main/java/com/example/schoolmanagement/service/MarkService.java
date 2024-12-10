@@ -12,6 +12,7 @@ import com.example.schoolmanagement.repository.StudentRepository;
 import com.example.schoolmanagement.repository.SubjectRepository;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
+import com.example.schoolmanagement.util.AuthenticationService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,15 @@ public class MarkService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final SubjectRepository subjectRepository;
+    private final AuthenticationService authenticationService;
 
 
-    public MarkService(MarkRepository markRepository, StudentRepository studentRepository, UserRepository userRepository, SubjectRepository subjectRepository) {
+    public MarkService(MarkRepository markRepository, StudentRepository studentRepository, UserRepository userRepository, SubjectRepository subjectRepository, AuthenticationService authenticationService) {
         this.markRepository = markRepository;
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.subjectRepository = subjectRepository;
+        this.authenticationService = authenticationService;
     }
 
     @Transactional
@@ -39,7 +42,7 @@ public class MarkService {
         student.setId(markRequestDTO.getStudentId());
         final Subject subject = this.subjectRepository.findById(markRequestDTO.getSubjectId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
         subject.setId(markRequestDTO.getSubjectId());
-        final Mark mark = Mark.builder().subject(subject).student(student).user(user).createdBy(markRequestDTO.getCreatedBy()).updatedBy(markRequestDTO.getUpdatedBy()).mark(markRequestDTO.getMark()).build();
+        final Mark mark = Mark.builder().subject(subject).student(student).user(user).createdBy(authenticationService.getCurrentUser()).updatedBy(authenticationService.getCurrentUser()).mark(markRequestDTO.getMark()).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.markRepository.save(mark)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
@@ -52,10 +55,7 @@ public class MarkService {
         final Mark existingMark = this.markRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.NOT_FOUND));
 
         if (markRequestDTO.getUpdatedBy() != null) {
-            existingMark.setUpdatedBy(markRequestDTO.getUpdatedBy());
-        }
-        if (markRequestDTO.getCreatedBy() != null) {
-            existingMark.setCreatedBy(markRequestDTO.getCreatedBy());
+            existingMark.setUpdatedBy(authenticationService.getCurrentUser());
         }
         if (markRequestDTO.getMark() != 0) {
             existingMark.setMark(markRequestDTO.getMark());
@@ -73,15 +73,19 @@ public class MarkService {
     }
 
     public ResponseDTO findByMark(final Integer mark) {
-        return new ResponseDTO(Constants.SUCCESS, this.markRepository.findByMarkLessThan(mark), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.markRepository.findByMarkLessThan(mark)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     public ResponseDTO OrderByMarkAsc() {
-        return new ResponseDTO(Constants.SUCCESS, this.markRepository.findAllOrderByMarkAsc(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.markRepository.findAllOrderByMarkAsc()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     public ResponseDTO OrderByMarkDesc() {
-        return new ResponseDTO(Constants.SUCCESS, this.markRepository.findAllOrderByMarkDesc(), HttpStatus.OK.getReasonPhrase());
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.markRepository.findAllOrderByMarkDesc()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
+    }
+
+    public ResponseDTO search(final Integer mark, final boolean lesserThan) {
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.markRepository.search(mark, lesserThan)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 }
 

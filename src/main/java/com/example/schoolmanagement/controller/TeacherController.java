@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -42,5 +43,9 @@ public class TeacherController {
         return this.teacherService.remove(id);
     }
 
+    @GetMapping("/search")
+    public ResponseDTO search(@RequestParam(required = false) final String school, @RequestParam(required = false) final String subject, @RequestParam(required = false) final String range, @RequestParam(required = false) Boolean lesserThan) {
+        return this.teacherService.search(school, subject, range, lesserThan);
+    }
 }
 

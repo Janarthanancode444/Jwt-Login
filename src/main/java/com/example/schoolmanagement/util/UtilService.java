@@ -8,10 +8,10 @@ public class UtilService {
 
 
     public static boolean emailValidation(String email) {
-        return Pattern.matches(EMAIL_REGEX, email);
+        return !Pattern.matches(EMAIL_REGEX, email);
     }
 
     public static boolean phoneNumberValidation(String phoneNumber) {
-        return Pattern.matches(PHONE_REGEX, phoneNumber);
+        return !Pattern.matches(PHONE_REGEX, phoneNumber);
     }
 }

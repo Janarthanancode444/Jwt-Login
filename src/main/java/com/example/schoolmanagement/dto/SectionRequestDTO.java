@@ -9,6 +9,7 @@ public class SectionRequestDTO {
     private String section;
     private String standardId;
     private String userId;
+    private String teacherId;
     private Instant createdAt;
     private String createdBy;
     private Instant updatedAt;

@@ -4,9 +4,6 @@ import com.example.schoolmanagement.dto.ResponseDTO;
 import com.example.schoolmanagement.dto.SchoolRequestDTO;
 import com.example.schoolmanagement.dto.SchoolResponseDTO;
 import com.example.schoolmanagement.service.SchoolService;
-import com.example.schoolmanagement.util.Constants;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,13 +45,7 @@ public class SchoolController {
     }
 
     @GetMapping("/search")
-    public ResponseDTO searchSchool(@RequestParam(required = false) String search,
-                                    @RequestParam(required = false) Integer page,
-                                    @RequestParam(required = false) Integer size,
-                                    @RequestParam(required = false, defaultValue = "name") String sortField,
-                                    @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
-        Page<SchoolRequestDTO> requestSchoolDTOS = this.schoolService.searchSchool(search, page, size, sortField, sortDirection);
-        return new ResponseDTO(Constants.RETRIEVED, requestSchoolDTOS, HttpStatus.OK.getReasonPhrase());
+    public ResponseDTO searchSchool(@RequestParam(required = false) String search, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size, @RequestParam(required = false, defaultValue = "name") String sortField, @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
+        return this.schoolService.searchSchool(search, page, size, sortField, sortDirection);
     }
-
 }

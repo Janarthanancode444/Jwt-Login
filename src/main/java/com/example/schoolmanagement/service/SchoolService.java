@@ -7,8 +7,11 @@ import com.example.schoolmanagement.entity.School;
 import com.example.schoolmanagement.entity.User;
 import com.example.schoolmanagement.exception.BadRequestServiceException;
 import com.example.schoolmanagement.repository.SchoolRepository;
+import com.example.schoolmanagement.repository.StandardRepository;
+import com.example.schoolmanagement.repository.SubjectRepository;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
+import com.example.schoolmanagement.util.AuthenticationService;
 import com.example.schoolmanagement.util.UtilService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -25,38 +28,43 @@ public class SchoolService {
 
     private final SchoolRepository schoolRepository;
     private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
+    private final StandardRepository standardRepository;
+    private final SubjectRepository subjectRepository;
 
-    public SchoolService(SchoolRepository schoolRepository, UserRepository userRepository) {
+    public SchoolService(SchoolRepository schoolRepository, UserRepository userRepository, AuthenticationService authenticationService, StandardRepository standardRepository, SubjectRepository subjectRepository) {
         this.schoolRepository = schoolRepository;
         this.userRepository = userRepository;
+        this.authenticationService = authenticationService;
+        this.standardRepository = standardRepository;
+        this.subjectRepository = subjectRepository;
     }
 
     @Transactional
     public ResponseDTO createSchool(final SchoolRequestDTO schoolRequestDTO) {
         final User user = this.userRepository.findById(schoolRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
-        user.setId(schoolRequestDTO.getUserId());
-        validatePhoneSchoolDTO(schoolRequestDTO);
-        validateSchoolDTO(schoolRequestDTO);
-        final School school = School.builder().name(schoolRequestDTO.getName()).address(schoolRequestDTO.getAddress()).phone(schoolRequestDTO.getPhone()).email(schoolRequestDTO.getEmail()).user(user).createdBy(schoolRequestDTO.getCreatedBy()).updatedBy(schoolRequestDTO.getUpdatedBy()).build();
-        return ResponseDTO.builder().message(Constants.SUCCESS).data(this.schoolRepository.save(school)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
+        this.validateSchoolDTO(schoolRequestDTO);
+        this.validatePhoneSchoolDTO(schoolRequestDTO);
+        final School school = School.builder().name(schoolRequestDTO.getName()).address(schoolRequestDTO.getAddress()).phone(schoolRequestDTO.getPhone()).email(schoolRequestDTO.getEmail()).user(user).createdBy(authenticationService.getCurrentUser()).updatedBy(authenticationService.getCurrentUser()).build();
+        return ResponseDTO.builder().message(Constants.CREATED).data(this.schoolRepository.save(school)).statusValue(HttpStatus.CREATED.name()).build();
     }
 
     private void validateSchoolDTO(final SchoolRequestDTO schoolRequestDTO) {
-        if (!UtilService.emailValidation(schoolRequestDTO.getEmail())) {
+        if (UtilService.emailValidation(schoolRequestDTO.getEmail())) {
             throw new BadRequestServiceException(Constants.EMAIL_PATTERN);
         }
         final List<School> emailFound = this.schoolRepository.findByEmail(schoolRequestDTO.getEmail());
-        if (emailFound != null) {
+        if (!emailFound.isEmpty()) {
             throw new BadRequestServiceException(Constants.EMAIL);
         }
     }
 
     private void validatePhoneSchoolDTO(final SchoolRequestDTO schoolRequestDTO) {
-        if (!UtilService.phoneNumberValidation(schoolRequestDTO.getPhone())) {
+        if (UtilService.phoneNumberValidation(schoolRequestDTO.getPhone())) {
             throw new BadRequestServiceException(Constants.PHONE_PATTERN);
         }
-        final List<School> PhoneFound = this.schoolRepository.findByPhone(schoolRequestDTO.getPhone());
-        if (PhoneFound != null) {
+        final List<School> phoneFound = this.schoolRepository.findByPhone(schoolRequestDTO.getPhone());
+        if (!phoneFound.isEmpty()) {
             throw new BadRequestServiceException(Constants.PHONE);
         }
     }
@@ -81,11 +89,8 @@ public class SchoolService {
         if (responseSchoolDTO.getPhone() != null) {
             existingSchool.setPhone(responseSchoolDTO.getPhone());
         }
-        if (responseSchoolDTO.getCreatedBy() != null) {
-            existingSchool.setCreatedBy(responseSchoolDTO.getCreatedBy());
-        }
         if (responseSchoolDTO.getUpdatedBy() != null) {
-            existingSchool.setUpdatedBy(responseSchoolDTO.getUpdatedBy());
+            existingSchool.setUpdatedBy(authenticationService.getCurrentUser());
         }
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.schoolRepository.save(existingSchool)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
@@ -99,14 +104,14 @@ public class SchoolService {
         return ResponseDTO.builder().message(Constants.DELETED).data(id).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
-    public Page<SchoolRequestDTO> searchSchool(final String search, final Integer page, final Integer size, final String sortField, final String sortDirection) {
+    public ResponseDTO searchSchool(final String search, final Integer page, final Integer size, final String sortField, final String sortDirection) {
         final Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
         Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 5, sort);
         final Page<School> school = this.schoolRepository.searchSchool(search, pageable);
         if (school.isEmpty()) {
             throw new BadRequestServiceException(Constants.NOT_FOUND);
         }
-        return school.map(this::convertToSchoolRequestDTO);
+        return ResponseDTO.builder().message(Constants.SUCCESS).data(school.map(this::convertToSchoolRequestDTO)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }
 
     private SchoolRequestDTO convertToSchoolRequestDTO(final School school) {
@@ -117,8 +122,6 @@ public class SchoolService {
         schoolRequestDTO.setPhone(school.getPhone());
         return schoolRequestDTO;
     }
-
-
 }
 
 

@@ -10,6 +10,7 @@ import com.example.schoolmanagement.repository.PermissionRepository;
 import com.example.schoolmanagement.repository.TeacherRepository;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.util.Constants;
+import com.example.schoolmanagement.util.AuthenticationService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,25 +20,20 @@ public class PermissionService {
     private final PermissionRepository permissionRepository;
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
 
-    public PermissionService(PermissionRepository permissionRepository, UserRepository userRepository, TeacherRepository teacherRepository) {
+    public PermissionService(PermissionRepository permissionRepository, UserRepository userRepository, TeacherRepository teacherRepository, AuthenticationService authenticationService) {
         this.permissionRepository = permissionRepository;
         this.userRepository = userRepository;
         this.teacherRepository = teacherRepository;
+        this.authenticationService = authenticationService;
     }
 
     @Transactional
     public ResponseDTO createPermission(final PermissionRequestDTO permissionRequestDTO) {
         final User user = this.userRepository.findById(permissionRequestDTO.getUserId()).orElseThrow(() -> new BadRequestServiceException(Constants.User));
-        user.setId(permissionRequestDTO.getUserId());
         final Teacher teacher = this.teacherRepository.findById(permissionRequestDTO.getTeacherId()).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
-        teacher.setId(permissionRequestDTO.getTeacherId());
-        final Permission permission = Permission.builder()
-                .createdBy(permissionRequestDTO.getCreatedBy())
-                .updatedBy(permissionRequestDTO.getUpdatedBy())
-                .teacher(teacher)
-                .user(user)
-                .build();
+        final Permission permission = Permission.builder().createdBy(authenticationService.getCurrentUser()).updatedBy(authenticationService.getCurrentUser()).teacher(teacher).user(user).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.permissionRepository.save(permission)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 
@@ -48,12 +44,8 @@ public class PermissionService {
     @Transactional
     public ResponseDTO update(final String id, final PermissionRequestDTO permissionRequestDTO) {
         final Permission existingSchool = this.permissionRepository.findById(id).orElseThrow(() -> new BadRequestServiceException(Constants.IDDOESNOTEXIST));
-
         if (permissionRequestDTO.getUpdatedBy() != null) {
-            existingSchool.setUpdatedBy(permissionRequestDTO.getUpdatedBy());
-        }
-        if (permissionRequestDTO.getCreatedBy() != null) {
-            existingSchool.setCreatedBy(permissionRequestDTO.getCreatedBy());
+            existingSchool.setUpdatedBy(authenticationService.getCurrentUser());
         }
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.permissionRepository.save(existingSchool)).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }

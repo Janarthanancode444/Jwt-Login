@@ -6,13 +6,9 @@ import com.example.schoolmanagement.dto.UserRequestDTO;
 import com.example.schoolmanagement.dto.UserResponseDTO;
 import com.example.schoolmanagement.service.JwtService;
 import com.example.schoolmanagement.service.UserService;
-import com.example.schoolmanagement.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,11 +52,6 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseDTO login(@RequestBody final AuthRequest authRequest) {
-        final Authentication authentication = this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
-        if (authentication.isAuthenticated()) {
-            return this.jwtService.generateToken(authRequest.getUsername());
-        } else {
-            throw new UsernameNotFoundException(Constants.NOT_FOUND);
-        }
+        return this.userService.login(authRequest);
     }
 }
