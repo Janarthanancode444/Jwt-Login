@@ -7,8 +7,8 @@ import com.example.schoolmanagement.dto.UserResponseDTO;
 import com.example.schoolmanagement.entity.User;
 import com.example.schoolmanagement.exception.BadRequestServiceException;
 import com.example.schoolmanagement.repository.UserRepository;
-import com.example.schoolmanagement.util.Constants;
 import com.example.schoolmanagement.util.AuthenticationService;
+import com.example.schoolmanagement.util.Constants;
 import com.example.schoolmanagement.util.UtilService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
@@ -67,7 +67,6 @@ public class UserService {
         }
     }
 
-    @Transactional
     public ResponseDTO retrieve() {
         return ResponseDTO.builder().message(Constants.RETRIEVED).data(this.userRepository.findAll()).statusValue(HttpStatus.OK.getReasonPhrase()).build();
     }

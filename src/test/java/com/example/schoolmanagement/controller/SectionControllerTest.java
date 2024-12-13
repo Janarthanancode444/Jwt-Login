@@ -1,4 +1,4 @@
-package com.controller;
+package com.example.schoolmanagement.controller;
 
 import com.example.schoolmanagement.controller.SectionController;
 import com.example.schoolmanagement.dto.ResponseDTO;

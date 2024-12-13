@@ -1,4 +1,4 @@
-package com.service;
+package com.example.schoolmanagement.service;
 
 import com.example.schoolmanagement.dto.ResponseDTO;
 import com.example.schoolmanagement.dto.StandardRequestDTO;

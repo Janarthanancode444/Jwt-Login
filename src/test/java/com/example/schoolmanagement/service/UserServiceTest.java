@@ -1,9 +1,10 @@
-package com.service;
+package com.example.schoolmanagement.service;
 
 import com.example.schoolmanagement.dto.ResponseDTO;
 import com.example.schoolmanagement.dto.UserRequestDTO;
 import com.example.schoolmanagement.dto.UserResponseDTO;
 import com.example.schoolmanagement.entity.User;
+import com.example.schoolmanagement.exception.BadRequestServiceException;
 import com.example.schoolmanagement.repository.UserRepository;
 import com.example.schoolmanagement.service.UserService;
 import com.example.schoolmanagement.util.AuthenticationService;
@@ -113,6 +114,18 @@ public class UserServiceTest {
     }
 
     @Test
+    public void testUpdateNegative() {
+        String id = "10";
+        when(this.userRepository.existsById(id)).thenReturn(false);
+        try {
+            UserResponseDTO userResponseDTO = new UserResponseDTO();
+            ResponseDTO responseDTO = this.userService.updateUser(userResponseDTO, id);
+        } catch (BadRequestServiceException exception) {
+            assertEquals(Constants.User, exception.getMessage());
+        }
+    }
+
+    @Test
     public void testRemove() {
 
         when(userRepository.existsById("dc0ce98e-9250-4915-8714-600178717a0b")).thenReturn(true);
@@ -124,4 +137,14 @@ public class UserServiceTest {
 
     }
 
+    @Test
+    public void testRemoveNegative() {
+        String id = "10";
+        when(this.userRepository.existsById(id)).thenReturn(false);
+        try {
+            ResponseDTO responseDTO = this.userService.removeUser(id);
+        } catch (BadRequestServiceException exception) {
+            assertEquals(Constants.NOT_FOUND, exception.getMessage());
+        }
+    }
 }

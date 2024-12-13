@@ -1,4 +1,4 @@
-package com.controller;
+package com.example.schoolmanagement.controller;
 
 import com.example.schoolmanagement.controller.UserController;
 import com.example.schoolmanagement.dto.ResponseDTO;
@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -22,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WithMockUser(username = "user", roles = {"ROLE_ADMIN"})
 public class UserControllerTest {
     private MockMvc mockMvc;
 
@@ -59,6 +62,27 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"User created successfully\"}"));
     }
+//    @Test
+//    public void testCreateUserInvalidInput() throws Exception {
+//
+//        UserRequestDTO userRequestDTO = new UserRequestDTO();
+//        userRequestDTO.setName("");
+//        userRequestDTO.setPhone("123");
+//        userRequestDTO.setRoles("admin");
+//        userRequestDTO.setEmail("invalid-email");
+//
+//        ResponseDTO responseDTO = new ResponseDTO();
+//        responseDTO.setMessage("Invalid input provided");
+//
+//
+//        when(userService.create(userRequestDTO)).thenReturn(responseDTO);
+//        mockMvc.perform(post("/api/user/create")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content("{\"name\":\"\", \"phone\":\"123\", \"email\":\"invalid-email\", \"roles\":\"admin\"}"))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().json("{\"error\":\"Invalid input provided\"}"));
+//    }
+
 
     @Test
     public void testRetrieveUser() throws Exception {
@@ -102,4 +126,19 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"message\":\"User deleted successfully\"}"));
     }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testRetrieveWithUserRole() throws Exception {
+        ResponseDTO responseDTO = new ResponseDTO();
+        responseDTO.setMessage("User retrieved successfully");
+
+        when(userService.retrieve()).thenReturn(responseDTO);
+
+        mockMvc.perform(get("/api/user/retrieve/"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"message\":\"User retrieved successfully\"}"));
+
+    }
+
 }

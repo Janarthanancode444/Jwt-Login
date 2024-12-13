@@ -1,4 +1,4 @@
-package com.controller;
+package com.example.schoolmanagement.controller;
 
 import com.example.schoolmanagement.controller.StandardController;
 import com.example.schoolmanagement.controller.SubjectController;

@@ -1,4 +1,4 @@
-package com.service;
+package com.example.schoolmanagement.service;
 
 import com.example.schoolmanagement.dto.ResponseDTO;
 import com.example.schoolmanagement.dto.TeacherRequestDTO;
@@ -86,7 +86,7 @@ public class TeacherServiceTest {
         assertEquals(data, teacher);
         assertEquals(Constants.CREATED, response.getMessage());
         assertNotNull(response.getData());
-        assertEquals(HttpStatus.CREATED.name(), response.getStatusValue());
+        assertEquals(HttpStatus.CREATED.name(), response.getStatusValue().toUpperCase());
     }
 
     @Test
