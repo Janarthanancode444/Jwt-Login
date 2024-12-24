@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+						http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <include file="db/changelog/131220241423_created_user_entity.xml"/>
+    <include file="db/changelog/131220241521_created_school_entity.xml"/>
+    <include file="db/changelog/131220241527_created_role_entity.xml"/>
+    <include file="db/changelog/131220241538_created_teacher_entity.xml"/>
+    <include file="db/changelog/131220241534_created_permission_entity.xml"/>
+    <include file="db/changelog/131220241346_created_student_entity.xml"/>
+    <include file="db/changelog/131220241557_created_standard_entity.xml"/>
+    <include file="db/changelog/131220241602_created_section_entity.xml"/>
+    <include file="db/changelog/131220241607_created_subject_entity.xml"/>
+    <include file="db/changelog/131220241611_created_mark_entity.xml"/>
+</databaseChangeLog>

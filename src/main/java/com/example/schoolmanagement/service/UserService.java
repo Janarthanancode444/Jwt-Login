@@ -43,7 +43,7 @@ public class UserService {
     public ResponseDTO create(final UserRequestDTO userRequestDTO) {
         this.validateEmail(userRequestDTO);
         this.validatePhone(userRequestDTO);
-        final User user = User.builder().createdBy(authenticationService.getCurrentUser()).updatedBy(authenticationService.getCurrentUser()).name(userRequestDTO.getName()).phone(userRequestDTO.getPhone()).email(userRequestDTO.getEmail()).password(passwordEncoder.encode(userRequestDTO.getPassword())).roles(userRequestDTO.getRoles()).build();
+        final User user = User.builder().createdBy(userRequestDTO.getName()).updatedBy(userRequestDTO.getName()).name(userRequestDTO.getName()).phone(userRequestDTO.getPhone()).email(userRequestDTO.getEmail()).password(passwordEncoder.encode(userRequestDTO.getPassword())).roles(userRequestDTO.getRoles()).build();
         return ResponseDTO.builder().message(Constants.SUCCESS).data(this.userRepository.save(user)).statusValue(HttpStatus.CREATED.getReasonPhrase()).build();
     }
 

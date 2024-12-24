@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+						http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="id" author="mani">
+        <createTable tableName="section">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="user_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="standard_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="teacher_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="section" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+             <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="updated_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="section" baseColumnNames="user_id" constraintName="fk_user_section" referencedTableName="user"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="section" baseColumnNames="standard_id" constraintName="fk_section_standard" referencedTableName="standard"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="section" baseColumnNames="teacher_id" constraintName="fk_section_teacher" referencedTableName="teacher"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
